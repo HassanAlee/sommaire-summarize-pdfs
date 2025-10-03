@@ -53,7 +53,7 @@ export default function HowItWorksSection() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto relative">
           {steps.map((item, idx) => (
-            <div className="relative flex items-stretch">
+            <div className="relative flex items-stretch" key={idx}>
               <StepItem key={idx} {...item} />
               {idx < steps.length - 1 && (
                 <div className="hidden absolute md:block top-1/2 -right-4 transform -translate-y-1/2 z-10">
