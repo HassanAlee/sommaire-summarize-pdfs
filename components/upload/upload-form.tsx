@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useRef, useState } from "react";
 import UploadFormInput from "./upload-form-input";
 import { z } from "zod";
 import { useUploadThing } from "@/utils/uploadthing";
@@ -20,6 +20,8 @@ const schema = z.object({
 });
 
 export default function UploadForm() {
+  const formRef = useRef<HTMLFormElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const { startUpload, routeConfig } = useUploadThing("pdfUploader", {
     onClientUploadComplete: () => {
       console.log("upload successfully");
@@ -33,6 +35,7 @@ export default function UploadForm() {
     },
   });
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    setIsLoading(true);
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const file = formData.get("file") as File;
@@ -47,18 +50,33 @@ export default function UploadForm() {
       return;
     }
     toast("📃 Uploading PDF");
-    const resp = await startUpload([file]);
-    if (!resp) {
-      toast("Please use a different file");
-      return;
+    try {
+      const resp = await startUpload([file]);
+      if (!resp) {
+        toast("Please use a different file");
+        return;
+      }
+      toast("📃 Processing PDF");
+      const summary = await generatePdfSummary(resp);
+      const { data = null, message = null } = summary || {};
+      if (data) {
+        toast("📃 Saving PDF");
+        formRef.current?.reset();
+      }
+    } catch (error) {
+      console.log("Error", error);
+      formRef.current?.reset();
+    } finally {
+      setIsLoading(false);
     }
-    toast("📃 Processing PDF");
-    const summary = await generatePdfSummary(resp);
-    console.log("this is summary", summary);
   };
   return (
     <div className="flex flex-col gap-8 w-full max-w-2xl mx-auto">
-      <UploadFormInput onSubmit={handleSubmit} />
+      <UploadFormInput
+        ref={formRef}
+        onSubmit={handleSubmit}
+        isLoading={isLoading}
+      />
     </div>
   );
 }

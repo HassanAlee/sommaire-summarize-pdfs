@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^6.33.1",
+    "@google/genai": "^1.25.0",
     "@langchain/community": "^1.0.0",
     "@langchain/core": "^0.3.78",
     "@radix-ui/react-slot": "^1.2.3",
